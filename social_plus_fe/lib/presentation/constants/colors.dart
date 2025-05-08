@@ -15,6 +15,12 @@ class AppColors {
 
   /// 채팅 말풍선 배경색
   static const Color chatBackground = Color(0xFFE9E9EB);
+
+  /// 밝은 회색(버튼 배경)
+  static const Color lightGray = Color(0xFFEFEFEF);
+
+  /// 버튼 글자색(직무선택화면)
+  static const Color black50 = Color(0x80000000);
 }
 
 /* 사용 예시

@@ -1,6 +1,8 @@
 // lib/presentation/widgets/app_scaffold.dart
 import 'package:flutter/material.dart';
 import '../constants/colors.dart';
+import '../constants/text_styles.dart';
+import 'custom_bottom_nav_bar.dart';
 
 class CommonScaffold extends StatelessWidget {
   final String title;
@@ -14,38 +16,39 @@ class CommonScaffold extends StatelessWidget {
     required this.body,
     this.selectedNavIndex = 1,
     this.onNavTap,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor = AppColors.background,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.background,
         centerTitle: true,
-        actions: [IconButton(icon: Icon(Icons.lock_outline), onPressed: () {})],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        title: Text(
+          title,
+          style: AppTextStyles.subtitleR.copyWith(color: AppColors.text),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
+            onPressed: () {}, // 기능은 나중에 채워도 됨
+          ),
+        ],
       ),
       body: body,
-      bottomNavigationBar: Container(
-        color: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavIcon(Icons.home_outlined, 0),
-            _buildNavIcon(Icons.chat_bubble_outline, 1),
-            _buildNavIcon(Icons.person_outline, 2),
-          ],
-        ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1,
+        onTap: (index) {
+          // TODO: 내비게이션 처리
+        },
       ),
     );
   }

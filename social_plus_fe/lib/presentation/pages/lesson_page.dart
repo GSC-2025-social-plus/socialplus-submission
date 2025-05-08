@@ -4,6 +4,8 @@ import 'package:social_plus_fe/presentation/pages/chat_page.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
 
+import '../widgets/primary_action_button.dart';
+
 /// ──────────────── Lesson 모델 ─────────────────
 class Lesson {
   final String text;
@@ -71,29 +73,21 @@ class LessonListScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, ChatPage.routeName);
-                    },
-                    icon: Image.asset(
-                      'assets/images/RightArrowCircle.png',
-                      width: 24,
-                      height: 24,
-                      // 만약 흰색으로 칠해진 벡터 아이콘이 아니라면 color: Colors.white는 제거하세요.
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      '시작하기',
-                      style: AppTextStyles.subtitle.copyWith(
+                  Align(
+                    alignment: Alignment.center,
+                    child: PrimaryActionButton(
+                      text: '시작하기',
+                      onPressed: () {
+                        Navigator.pushNamed(context, ChatPage.routeName);
+                      },
+                      icon: Image.asset(
+                        'assets/images/RightArrowCircle.png',
+                        width: 24,
+                        height: 24,
                         color: Colors.white,
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      alignment: MainAxisAlignment.center,
+                      width: 177,
                     ),
                   ),
                   const SizedBox(height: 16),

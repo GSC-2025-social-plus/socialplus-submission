@@ -2,38 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/pages/chat_page.dart';
 import 'package:social_plus_fe/presentation/pages/lesson_page.dart';
+import 'package:social_plus_fe/presentation/pages/home_screen.dart';
+import 'package:social_plus_fe/presentation/pages/lesson_selection_screen.dart';
+import 'package:social_plus_fe/presentation/viewmodels/home_viewmodel.dart';
+import 'package:social_plus_fe/presentation/viewmodels/lesson_select_viewmodel.dart';
+import 'data/repositories/lesson_repository.dart';
+import 'presentation/pages/type_choose_screen.dart';
+import 'presentation/pages/job_type_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<LessonRepository>(create: (_) => LessonRepository()),
+        ChangeNotifierProvider(
+          create: (context) => HomeViewModel(context.read<LessonRepository>()),
+        ),
+        ChangeNotifierProvider(create: (_) => LessonSelectViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-
-      theme: ThemeData(
-        fontFamily: 'Pretendard',
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.chatBackground),
-      ),
-
-      initialRoute: '/',
-
-      routes: {
-        // "/" 는 MyHomePage
-        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
-        // Lesson_page
-        LessonListScreen.routeName: (context) => LessonListScreen(),
-        // chat_page
-        ChatPage.routeName: (context) => const ChatPage(),
-      },
-
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'Flutter Demo',
+    theme: ThemeData(
+      fontFamily: 'Pretendard',
+      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.chatBackground),
+    ),
+    initialRoute: '/',
+    routes: {
+      '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+      LessonListScreen.routeName: (context) => LessonListScreen(),
+      ChatPage.routeName: (context) => const ChatPage(),
+      // 추가
+      '/lessonSelect': (context) => const LessonSelectScreen(),
+      '/home': (context) => const HomeScreen(),
+    },
+  );
   }
 }
 

@@ -17,6 +17,13 @@ class AppTextStyles {
     fontFamily: _fontFamily,
   );
 
+  /// 서브 타이틀 레귤러
+  static const TextStyle subtitleR = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    fontFamily: _fontFamily,
+  );
+
   /// 본문 (예: 일반 텍스트)
   static const TextStyle body = TextStyle(
     fontSize: 14,
