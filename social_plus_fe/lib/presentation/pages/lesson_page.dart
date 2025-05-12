@@ -3,7 +3,6 @@ import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
 import 'package:social_plus_fe/presentation/pages/chat_page.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
-
 import '../widgets/primary_action_button.dart';
 
 /// ──────────────── Lesson 모델 ─────────────────

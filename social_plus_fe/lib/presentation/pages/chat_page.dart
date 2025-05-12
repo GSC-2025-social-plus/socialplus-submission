@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ChatPage extends StatefulWidget {
   static const routeName = '/chat';
@@ -12,28 +14,95 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final List<ChatMessage> _messages = [
-    ChatMessage(text: '안녕, 오랜만이야.', isMe: false),
-    ChatMessage(text: '잘 지냈어? 😊', isMe: true),
-  ];
+  final List<ChatMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
 
-  void _handleSend() {
+  static const String _startUrl =
+      'https://startconversation-imrcv7okwa-uc.a.run.app';
+  static const String _sendUrl = 'https://sendmessage-imrcv7okwa-uc.a.run.app';
+  static const String _userId = 'user123';
+  static const String _scenarioId = 'park_friend_scenario';
+
+  String? _sessionId; // startConversation 으로 받은 세션 ID
+  String? _sessionStatus; // sendMessage 응답의 sessionStatus
+  List<String> _completedMissions = []; // sendMessage 응답의 completedMissions
+
+  @override
+  void initState() {
+    super.initState();
+    _startConversation();
+  }
+
+  /// 1) startConversation 호출
+  Future<void> _startConversation() async {
+    final uri = Uri.parse(_startUrl);
+    final res = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': _userId, 'scenario': _scenarioId}),
+    );
+    if (res.statusCode != 200) {
+      throw Exception('startConversation failed: status ${res.statusCode}');
+    }
+
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    setState(() {
+      _sessionId = data['sessionId'] as String?;
+      _messages.add(
+        ChatMessage(
+          text: data['botInitialMessage'] as String,
+          isMe: false,
+          showStamp: false, // 기본적으로 스탬프는 표시하지 않음
+        ),
+      );
+    });
+  }
+
+  /// 2) sendMessage 호출
+  Future<void> _sendMessage(String userMessage) async {
+    if (_sessionId == null) return;
+
+    final uri = Uri.parse(_sendUrl);
+    final res = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': _userId,
+        'sessionId': _sessionId,
+        'message': userMessage,
+      }),
+    );
+    if (res.statusCode != 200) {
+      throw Exception('sendMessage failed: status ${res.statusCode}');
+    }
+
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    setState(() {
+      _messages.add(
+        ChatMessage(
+          text: data['botMessage'] as String,
+          isMe: false,
+          showStamp: false, // 기본값: 스탬프 표시 안 함
+        ),
+      );
+      _sessionStatus = data['sessionStatus'] as String?;
+      _completedMissions =
+          (data['completedMissions'] as List<dynamic>).cast<String>();
+    });
+  }
+
+  void _handleSend() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    // 1) 내 메시지 추가
     setState(() {
-      _messages.add(ChatMessage(text: text, isMe: true));
+      // 1) 내 메시지 화면에 추가
+      _messages.add(ChatMessage(text: text, isMe: true, showStamp: false));
     });
     _controller.clear();
 
-    // 2) (모의) 상대방 답장 추가 — 바로 혹은 약간 지연시켜서
-    Future.delayed(const Duration(milliseconds: 300), () {
-      setState(() {
-        _messages.add(ChatMessage(text: text, isMe: false));
-      });
-    });
+    // 2) 백엔드로 전송하고 응답 처리
+    await _sendMessage(text);
   }
 
   @override
@@ -44,8 +113,10 @@ class _ChatPageState extends State<ChatPage> {
       onNavTap: (idx) {
         /* 탭 이동 */
       },
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
+          // ─── 채팅 메시지 리스트 ──────────────────
           Expanded(
             child: Container(
               color: AppColors.background,
@@ -58,11 +129,13 @@ class _ChatPageState extends State<ChatPage> {
                 itemCount: _messages.length,
                 itemBuilder: (_, i) {
                   final msg = _messages[_messages.length - 1 - i];
-                  return ChatBubble(msg: msg);
+                  return _MessageWithStamp(msg: msg);
                 },
               ),
             ),
           ),
+
+          // ─── 입력 영역 ──────────────────────────
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -71,7 +144,9 @@ class _ChatPageState extends State<ChatPage> {
                   IconButton(
                     icon: const Icon(Icons.mic, size: 28),
                     color: AppColors.gray,
-                    onPressed: () {},
+                    onPressed: () {
+                      /* 음성 인식 */
+                    },
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -109,15 +184,51 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-      backgroundColor: AppColors.background,
     );
+  }
+}
+
+/// 메시지와, 상대방 메시지 뒤에만 스탬프를 붙여주는 위젯
+class _MessageWithStamp extends StatelessWidget {
+  final ChatMessage msg;
+  const _MessageWithStamp({required this.msg, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final bubble = ChatBubble(msg: msg);
+
+    // 상대방 메시지이면서, showStamp가 true일 때만 도장 표시
+    if (!msg.isMe && msg.showStamp) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          bubble,
+          const SizedBox(height: 6),
+          Image.asset(
+            'assets/images/missionComplete.png',
+            width: 100,
+            height: 100,
+            fit: BoxFit.contain,
+          ),
+        ],
+      );
+    }
+
+    // 그 외에는 말풍선만
+    return bubble;
   }
 }
 
 class ChatMessage {
   final String text;
   final bool isMe;
-  ChatMessage({required this.text, this.isMe = false});
+  final bool showStamp; // ◀ 추가: 스탬프 표시 여부
+
+  ChatMessage({
+    required this.text,
+    this.isMe = false,
+    this.showStamp = false, // 기본값 false
+  });
 }
 
 class ChatBubble extends StatelessWidget {
