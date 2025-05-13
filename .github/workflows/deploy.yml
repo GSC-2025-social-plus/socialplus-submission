@@ -2,8 +2,8 @@ name: Deploy Flutter Web
 
 on:
   push:
-    branches: [main]
-
+    branches:
+      - deploy  # deploy 브랜치에 푸시될 때만 실행
 jobs:
   build:
     runs-on: ubuntu-latest
