@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./socialplus-frontend
     steps:
       - uses: actions/checkout@v4
 
