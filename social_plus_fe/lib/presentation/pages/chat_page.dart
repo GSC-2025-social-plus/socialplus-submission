@@ -24,7 +24,7 @@ class ChatPage extends StatefulWidget {
     this.scenarioId = _defaultScenarioId,
     this.userId = _defaultUserId,
   });
-/* 추후 연결을 위한 부분 */
+  /* 추후 연결을 위한 부분 */
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -39,7 +39,6 @@ class _ChatPageState extends State<ChatPage> {
   static const String _sendUrl = 'https://sendmessage-imrcv7okwa-uc.a.run.app';
   static const String _userId = 'user123';
   static const String _scenarioId = 'park_friend_scenario';
-
 
   String? _sessionId; // startConversation 으로 받은 세션 ID
   String? _sessionStatus; // sendMessage 응답의 sessionStatus
@@ -84,7 +83,6 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => _isListening = false);
     _silenceTimer?.cancel(); // 타이머 정리
   }
-
 
   @override
   void initState() {
@@ -137,12 +135,18 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final data = jsonDecode(res.body) as Map<String, dynamic>;
+
+    // 1) completedMissions 파싱
+    final List<String> completedMissions =
+        (data['completedMissions'] as List<dynamic>).cast<String>();
+    final bool missionCompleted = completedMissions.isNotEmpty;
+
     setState(() {
       _messages.add(
         ChatMessage(
           text: data['botMessage'] as String,
           isMe: false,
-          showStamp: false, // 기본값: 스탬프 표시 안 함
+          showStamp: missionCompleted, // 기본값: 스탬프 표시 안 함
         ),
       );
       _sessionStatus = data['sessionStatus'] as String?;
@@ -202,7 +206,10 @@ class _ChatPageState extends State<ChatPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(_isListening ? Icons.mic_off : Icons.mic, size: 28),
+                    icon: Icon(
+                      _isListening ? Icons.mic_off : Icons.mic,
+                      size: 28,
+                    ),
                     color: AppColors.gray,
                     onPressed: _isListening ? _stopListening : _startListening,
                   ),
