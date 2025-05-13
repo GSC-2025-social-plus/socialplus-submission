@@ -12,7 +12,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'  # 또는 특정 버전(ex: '3.19.0')
+    		channel: stable
+    		flutter-version: '3.29.3'
 
       - run: flutter pub get
       - run: flutter build web --base-href "/socialplus-frontend-deploy/"
