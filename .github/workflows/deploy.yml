@@ -32,5 +32,5 @@ jobs:
           git add .
           git commit -m "Auto-deploy: $(date)"
           git branch -M deploy
-          git remote add origin https://github.com/GSC-2025-social-plus/socialplus-frontend-deploy.git
+          git remote add origin https://x-access-token:${DEPLOY_TOKEN}@github.com/GSC-2025-social-plus/socialplus-frontend-deploy.git
           git push -f origin HEAD:deploy
