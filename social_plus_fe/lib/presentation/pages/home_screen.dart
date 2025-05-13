@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
+import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
 import '../viewmodels/home_viewmodel.dart';
-import '../widgets/common_app_bar.dart';
+import '../viewmodels/user_preferences_viewmodel.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import '../widgets/lesson_card.dart';
 import '../widgets/primary_action_button.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,8 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
 
-    return Scaffold(
-      appBar: buildCommonAppBar(username: '김민성님'),
+    return CommonScaffold(
+      title: "김민성님",
+      selectedNavIndex: 0,
       backgroundColor: AppColors.background,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -54,18 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.only(right: 16),
                 itemBuilder: (context, index) {
                   final lesson = viewModel.lessons[index];
-                  return _buildLessonCard(
-                    context,
+                  return LessonCard(
                     imagePath: lesson.imagePath,
                     title: lesson.title,
                     description: lesson.description,
-                    buttonText: lesson.isAvailable
-                        ? '시작하기'
-                        : '레슨 완료 후 이용하세요',
+                    buttonText: lesson.isAvailable ? '시작하기' : '레슨 완료 후 이용하세요',
                     onPressed: lesson.isAvailable
-                        ? () {
-                      // TODO: 다음 화면 이동
-                    }
+                        ? () {}
                         : null,
                   );
                 },
@@ -79,7 +78,18 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             PrimaryActionButton(
               text: '레슨 진행하기',
-              onPressed: () {},
+              onPressed: () async {
+                final prefs = context.read<UserPreferencesViewModel>();
+                await prefs.loadPreferences();
+
+                final selectedType = prefs.conversationType;
+
+                if (selectedType != null && selectedType.isNotEmpty) {
+                  context.push('/lesson-selection');
+                } else {
+                  context.push('/type-choose');
+                }
+              },
               icon: Image.asset(
                 'assets/images/leftArrowCircle.png',
                 width: 24,
@@ -90,81 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
-        onTap: (index) {
-          // TODO: 내비게이션 처리
-        },
-      ),
-    );
-  }
-
-  Widget _buildLessonCard(
-      BuildContext context, {
-        required String imagePath,
-        required String title,
-        required String description,
-        required String buttonText,
-        VoidCallback? onPressed,
-      }) {
-    return Container(
-      width: 280,
-      height: 350,
-      margin: const EdgeInsets.only(right: 16),
-      decoration: BoxDecoration(
-        color: AppColors.lightGray,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                child: Image.asset(imagePath, width: double.infinity, height: 130, fit: BoxFit.cover),
-              ),
-              const Positioned(
-                top: 10,
-                right: 10,
-                child: Icon(Icons.star, color: Colors.amber),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(title, style: AppTextStyles.body.copyWith(color: AppColors.text)),
-                const SizedBox(height: 8),
-                Divider( // ✅ 구분선
-                  color: AppColors.gray,
-                  thickness: 1,
-                  height: 16, // 위아래 padding 역할
-                ),
-                Text(description, style: AppTextStyles.caption.copyWith(color: AppColors.black50), textAlign: TextAlign.center,),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: onPressed,
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                    ),
-                    child: Text(buttonText, style: AppTextStyles.caption.copyWith(color: Colors.white)),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
       ),
     );
   }

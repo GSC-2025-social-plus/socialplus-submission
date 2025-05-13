@@ -4,10 +4,27 @@ import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:async';
 
 class ChatPage extends StatefulWidget {
   static const routeName = '/chat';
-  const ChatPage({Key? key}) : super(key: key);
+
+  static const String _defaultUserId = 'user123';
+  static const String _defaultScenarioId = 'park_friend_scenario';
+
+  /* 추후 연결을 위한 부분 */
+  final int lessonIndex;
+  final String userId;
+  final String scenarioId;
+
+  const ChatPage({
+    super.key,
+    required this.lessonIndex,
+    this.scenarioId = _defaultScenarioId,
+    this.userId = _defaultUserId,
+  });
+/* 추후 연결을 위한 부분 */
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -23,14 +40,57 @@ class _ChatPageState extends State<ChatPage> {
   static const String _userId = 'user123';
   static const String _scenarioId = 'park_friend_scenario';
 
+
   String? _sessionId; // startConversation 으로 받은 세션 ID
   String? _sessionStatus; // sendMessage 응답의 sessionStatus
   List<String> _completedMissions = []; // sendMessage 응답의 completedMissions
+
+  // 음성 인식
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  Timer? _silenceTimer; // 일정 시간이 지나면 자동으로 음성인식을 종료하기 위한 타이머 변수
+
+  void _startListening() async {
+    bool available = await _speech.initialize();
+    if (available) {
+      setState(() => _isListening = true);
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            _controller.text = result.recognizedWords;
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
+          });
+          // 타이머 리셋
+          _resetSilenceTimer();
+        },
+        localeId: 'ko_KR',
+      );
+      _resetSilenceTimer();
+    }
+  }
+
+  void _resetSilenceTimer() {
+    _silenceTimer?.cancel();
+    _silenceTimer = Timer(const Duration(seconds: 3), () {
+      _stopListening();
+    });
+  }
+
+  void _stopListening() {
+    _speech.stop();
+    setState(() => _isListening = false);
+    _silenceTimer?.cancel(); // 타이머 정리
+  }
+
 
   @override
   void initState() {
     super.initState();
     _startConversation();
+    _speech = stt.SpeechToText();
   }
 
   /// 1) startConversation 호출
@@ -142,11 +202,9 @@ class _ChatPageState extends State<ChatPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.mic, size: 28),
+                    icon: Icon(_isListening ? Icons.mic_off : Icons.mic, size: 28),
                     color: AppColors.gray,
-                    onPressed: () {
-                      /* 음성 인식 */
-                    },
+                    onPressed: _isListening ? _stopListening : _startListening,
                   ),
                   const SizedBox(width: 8),
                   Expanded(

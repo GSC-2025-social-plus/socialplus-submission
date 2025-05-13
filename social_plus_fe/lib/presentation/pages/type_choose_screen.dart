@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
-import '../widgets/common_app_bar.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
+import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
+import '../viewmodels/user_preferences_viewmodel.dart';
+import '../widgets/type_option_card.dart';
 
 class TypeChooseScreen extends StatelessWidget {
   const TypeChooseScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CommonScaffold(
       backgroundColor: AppColors.background,
-      appBar: buildCommonAppBar(username: '김민성'),
+      title: "김민성님",
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -26,26 +29,28 @@ class TypeChooseScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            _buildOptionCard(
-              context,
+            TypeOptionCard(
               iconPath: 'assets/images/friends.png',
               text: '친구와의 대화, 감정 표현이 어렵다면\n여기를 눌러보세요!',
+              onTap: () async {
+                final prefs = context.read<UserPreferencesViewModel>();
+                await prefs.saveConversationType('daily');
+                Future.microtask(() {
+                  context.go('/lesson-selection');
+                });
+              },
             ),
             const SizedBox(height: 20),
-            _buildOptionCard(
-              context,
+            TypeOptionCard(
               iconPath: 'assets/images/business.png',
               text: '상사나 동료와의 대화가 어렵다면\n여기를 눌러보세요!',
+              onTap: () {
+                context.push('/job-type');
+              },
             ),
           ],
         ),
       ),
-        bottomNavigationBar: CustomBottomNavBar(
-          currentIndex: 1,
-          onTap: (index) {
-            //TODO: 내비게이션 처리
-          },
-        )
     );
   }
 

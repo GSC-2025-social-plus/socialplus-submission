@@ -1,7 +1,10 @@
 // lib/presentation/widgets/app_scaffold.dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/text_styles.dart';
+import '../viewmodels/user_preferences_viewmodel.dart';
 import 'custom_bottom_nav_bar.dart';
 
 class CommonScaffold extends StatelessWidget {
@@ -20,6 +23,30 @@ class CommonScaffold extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  void _handleNavTap(BuildContext context, int index) async {
+
+    switch (index) {
+      case 0:
+        context.go('/home');
+        break;
+      case 1:
+        final prefsViewModel = context.read<UserPreferencesViewModel>();
+        print('[TAB] before load: ${prefsViewModel.conversationType}');
+        await prefsViewModel.loadPreferences();
+        final type = prefsViewModel.conversationType;
+        print('[TAB] after load: $type');
+        context.go(type != null && type.isNotEmpty
+            ? '/lesson-selection'
+            : '/type-choose');
+
+        break;
+      case 2:
+        // context.go('/profile');
+        break;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,23 +63,14 @@ class CommonScaffold extends StatelessWidget {
           title,
           style: AppTextStyles.subtitleR.copyWith(color: AppColors.text),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.black),
-            onPressed: () {}, // 기능은 나중에 채워도 됨
-          ),
-        ],
       ),
       body: body,
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
-        onTap: (index) {
-          // TODO: 내비게이션 처리
-        },
+          currentIndex: selectedNavIndex,
+          onTap: (index) => _handleNavTap(context, index)
       ),
     );
   }
-
   Widget _buildNavIcon(IconData icon, int idx) {
     final color = idx == selectedNavIndex ? Colors.blue : Colors.grey;
     return Icon(icon, color: color, size: 32);
