@@ -21,6 +21,8 @@ jobs:
       - run: flutter pub get
       - run: flutter build web --base-href "/socialplus-frontend-deploy/"
 
+      - run: touch build/web/.nojekyll
+
       - name: Push to Deployment Repo
         env:
           DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
