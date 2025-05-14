@@ -27,10 +27,13 @@ void main() {
           ),
           ChangeNotifierProvider(create: (_) => LessonSelectViewModel()),
           ChangeNotifierProvider(
-            create:
-                (_) => UserPreferencesViewModel(
-                  UserPreferencesRepositoryImpl(UserPreferencesDataSource()),
-                ),
+            create: (_) {
+              final vm = UserPreferencesViewModel(
+                UserPreferencesRepositoryImpl(UserPreferencesDataSource()),
+              );
+              vm.loadPreferences();
+              return vm;
+            },
           ),
         ],
         child: const MyApp(),

@@ -44,6 +44,9 @@ class _ChatPageState extends State<ChatPage> {
   String? _sessionStatus;
   List<String> _completedMissions = [];
 
+  bool _acceptSttInput = true;
+  bool _micPermissionGranted = true;
+
   static const String _startUrl =
       'https://startconversation-imrcv7okwa-uc.a.run.app';
   static const String _sendUrl = 'https://sendmessage-imrcv7okwa-uc.a.run.app';
@@ -127,22 +130,39 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _startListening() async {
-    final available = await _speech.initialize();
-    if (!available) return;
-    setState(() => _isListening = true);
-    _speech.listen(
-      onResult: (result) {
-        setState(() {
-          _controller.text = result.recognizedWords;
-          _controller.selection = TextSelection.collapsed(
-            offset: _controller.text.length,
-          );
-        });
-        _resetSilenceTimer();
-      },
-      localeId: 'ko_KR',
-    );
-    _resetSilenceTimer();
+    bool available = await _speech.initialize();
+
+    setState(() {
+      _micPermissionGranted = available; // 권한 상태 저장
+    });
+
+    if (!available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("마이크 권한이 필요해요! 설정에서 허용해주세요.")),
+      );
+      return;
+    }
+
+    if (available) {
+      setState(() {
+        _isListening = true;
+        _acceptSttInput = true;
+      });
+      _speech.listen(
+        onResult: (result) {
+          if (!_acceptSttInput) return;
+          setState(() {
+            _controller.text = result.recognizedWords;
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
+          });
+          _resetSilenceTimer();
+        },
+        localeId: 'ko_KR',
+      );
+      _resetSilenceTimer();
+    }
   }
 
   void _resetSilenceTimer() {
@@ -152,8 +172,11 @@ class _ChatPageState extends State<ChatPage> {
 
   void _stopListening() {
     _speech.stop();
-    setState(() => _isListening = false);
     _silenceTimer?.cancel();
+    setState(() {
+      _isListening = false;
+      _acceptSttInput = false;
+    });
   }
 
   @override
@@ -215,14 +238,21 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        _isListening ? Icons.mic_off : Icons.mic,
-                        size: 28,
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: IconButton(
+                        icon: Icon(
+                          _micPermissionGranted ? Icons.mic : Icons.mic_off,
+                          size: _isListening ? 32 : 28,
+                        ),
+                        color: _isListening
+                            ? AppColors.primary
+                            : AppColors.gray.withOpacity(_micPermissionGranted ? 1.0 : 0.4),
+                        onPressed: _micPermissionGranted
+                            ? (_isListening ? _stopListening : _startListening)
+                            : null,
                       ),
-                      color: AppColors.gray,
-                      onPressed:
-                          _isListening ? _stopListening : _startListening,
                     ),
                     const SizedBox(width: 8),
                     Expanded(

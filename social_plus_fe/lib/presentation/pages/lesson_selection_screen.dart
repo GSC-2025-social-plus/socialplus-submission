@@ -19,7 +19,7 @@ class LessonSelectionScreen extends StatelessWidget {
     return CommonScaffold(
       backgroundColor: AppColors.background,
       selectedNavIndex: 1,
-      title: "김민성님",
+      title: "레슨 선택하기",
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -29,23 +29,37 @@ class LessonSelectionScreen extends StatelessWidget {
             Center(
               child: RichText(
                 textAlign: TextAlign.center,
-                text: TextSpan(
-                  text: 'Lesson ',
-                  style: AppTextStyles.subtitle.copyWith(color: AppColors.primary),
-                  children: [
-                    TextSpan(
-                      text: '1',
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                text: () {
+                  final nextIndex = lessonCompletion.indexOf(false);
+                  final nextLesson = nextIndex == -1 ? null : nextIndex + 1;
+
+                  if (nextLesson == null) {
+                    return TextSpan(
+                      text: '축하해요! 모든 레슨을 완료했어요!',
+                      style: AppTextStyles.subtitle.copyWith(color: AppColors.primary),
+                    );
+                  }
+
+                  return TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Lesson ',
+                        style: AppTextStyles.subtitle.copyWith(color: AppColors.primary),
                       ),
-                    ),
-                    TextSpan(
-                      text: '부터 진행해봅시다!',
-                      style: AppTextStyles.caption.copyWith(color: AppColors.gray),
-                    ),
-                  ],
-                ),
+                      TextSpan(
+                        text: '$nextLesson',
+                        style: AppTextStyles.subtitle.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '부터 진행해봅시다!',
+                        style: AppTextStyles.caption.copyWith(color: AppColors.gray),
+                      ),
+                    ],
+                  );
+                }(),
               ),
             ),
 

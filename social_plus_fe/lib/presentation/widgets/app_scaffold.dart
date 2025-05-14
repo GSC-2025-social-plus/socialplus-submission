@@ -31,10 +31,8 @@ class CommonScaffold extends StatelessWidget {
         break;
       case 1:
         final prefsViewModel = context.read<UserPreferencesViewModel>();
-        print('[TAB] before load: ${prefsViewModel.conversationType}');
         await prefsViewModel.loadPreferences();
-        final type = prefsViewModel.conversationType;
-        print('[TAB] after load: $type');
+        final type = prefsViewModel.conversationType;;
         context.go(type != null && type.isNotEmpty
             ? '/lesson-selection'
             : '/type-choose');

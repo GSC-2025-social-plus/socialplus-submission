@@ -15,7 +15,7 @@ class JobTypeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CommonScaffold(
       backgroundColor: AppColors.background,
-      title: "김민성님",
+      title: "직무 유형 선택하기",
       selectedNavIndex: 1,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

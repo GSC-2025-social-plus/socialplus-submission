@@ -8,6 +8,7 @@ class SpeechRecognitionViewModel extends ChangeNotifier {
   bool isListening = false;
   final TextEditingController textController = TextEditingController();
   Timer? _silenceTimer;
+  bool _acceptSttInput = true;
 
   SpeechRecognitionViewModel(this.repo);
 
@@ -19,10 +20,12 @@ class SpeechRecognitionViewModel extends ChangeNotifier {
     bool available = await repo.initialize();
     if (!available) return;
 
+    _acceptSttInput = true;
     isListening = true;
     notifyListeners();
 
     repo.startListening((text) {
+      if (!_acceptSttInput) return;
       textController.text = text;
       textController.selection = TextSelection.fromPosition(
         TextPosition(offset: textController.text.length),
@@ -36,12 +39,13 @@ class SpeechRecognitionViewModel extends ChangeNotifier {
 
   void _resetSilenceTimer() {
     _silenceTimer?.cancel();
-    _silenceTimer = Timer(const Duration(seconds: 3), () {
+    _silenceTimer = Timer(const Duration(seconds: 2), () {
       stopListening();
     });
   }
 
   Future<void> stopListening() async {
+    _acceptSttInput = false;
     isListening = false;
     notifyListeners();
     await repo.stopListening();

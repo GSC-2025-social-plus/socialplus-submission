@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final viewModel = context.watch<HomeViewModel>();
 
     return CommonScaffold(
-      title: "김민성님",
+      title: "Home",
       selectedNavIndex: 0,
       backgroundColor: AppColors.background,
       body: Padding(
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '이번주 인기강좌 TOP 5',
+              '이번 주 인기 강좌',
               style: AppTextStyles.subtitleR.copyWith(color: AppColors.text),
             ),
             const SizedBox(height: 12),
@@ -86,9 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 final selectedType = prefs.conversationType;
 
                 if (selectedType != null && selectedType.isNotEmpty) {
-                  context.go(RouteNames.lessonSelection);
+                  context.push(RouteNames.lessonSelection);
                 } else {
-                  context.go(RouteNames.typeChoose);
+                  context.push(RouteNames.typeChoose);
                 }
               },
               icon: Image.asset(

@@ -15,7 +15,7 @@ class TypeChooseScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CommonScaffold(
       backgroundColor: AppColors.background,
-      title: "김민성님",
+      title: "대화 유형 선택하기",
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(

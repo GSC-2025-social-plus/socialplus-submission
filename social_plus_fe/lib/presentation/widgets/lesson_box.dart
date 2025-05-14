@@ -84,10 +84,17 @@ class LessonBox extends StatelessWidget {
               ),
             ),
             if (isCompleted)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Image.asset('assets/images/mission_completed.png', width: 48),
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Center( 
+                    child: Image.asset(
+                      'assets/images/missionComplete.png',
+                      width: 100,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
           ],
         ),
