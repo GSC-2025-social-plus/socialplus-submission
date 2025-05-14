@@ -99,4 +99,4 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) fo
 ## Notes
 
 - No additional setup is required except for Flutter installation.
-- For overall project information, please refer to the [main README](../README.md).
+- For overall project information, please refer to the main README.
