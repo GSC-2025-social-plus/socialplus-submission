@@ -1,11 +1,17 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
+import 'package:social_plus_fe/presentation/widgets/primary_action_button.dart';
+import 'package:social_plus_fe/presentation/viewmodels/user_preferences_viewmodel.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'dart:async';
+import 'package:http/http.dart' as http;
+import '../routes/route_names.dart';
 
 class ChatPage extends StatefulWidget {
   static const routeName = '/chat';
@@ -13,246 +19,251 @@ class ChatPage extends StatefulWidget {
   static const String _defaultUserId = 'user123';
   static const String _defaultScenarioId = 'park_friend_scenario';
 
-  /* 추후 연결을 위한 부분 */
   final int lessonIndex;
   final String userId;
   final String scenarioId;
 
   const ChatPage({
-    super.key,
+    Key? key,
     required this.lessonIndex,
-    this.scenarioId = _defaultScenarioId,
     this.userId = _defaultUserId,
-  });
-  /* 추후 연결을 위한 부분 */
+    this.scenarioId = _defaultScenarioId,
+  }) : super(key: key);
 
   @override
-  _ChatPageState createState() => _ChatPageState();
+  State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
   final List<ChatMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  late final stt.SpeechToText _speech;
+  bool _isListening = false;
+  Timer? _silenceTimer;
+  String? _sessionId;
+  String? _sessionStatus;
+  List<String> _completedMissions = [];
 
   static const String _startUrl =
       'https://startconversation-imrcv7okwa-uc.a.run.app';
   static const String _sendUrl = 'https://sendmessage-imrcv7okwa-uc.a.run.app';
-  static const String _userId = 'user123';
-  static const String _scenarioId = 'park_friend_scenario';
-
-  String? _sessionId; // startConversation 으로 받은 세션 ID
-  String? _sessionStatus; // sendMessage 응답의 sessionStatus
-  List<String> _completedMissions = []; // sendMessage 응답의 completedMissions
-
-  // 음성 인식
-  late stt.SpeechToText _speech;
-  bool _isListening = false;
-
-  Timer? _silenceTimer; // 일정 시간이 지나면 자동으로 음성인식을 종료하기 위한 타이머 변수
-
-  void _startListening() async {
-    bool available = await _speech.initialize();
-    if (available) {
-      setState(() => _isListening = true);
-      _speech.listen(
-        onResult: (result) {
-          setState(() {
-            _controller.text = result.recognizedWords;
-            _controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: _controller.text.length),
-            );
-          });
-          // 타이머 리셋
-          _resetSilenceTimer();
-        },
-        localeId: 'ko_KR',
-      );
-      _resetSilenceTimer();
-    }
-  }
-
-  void _resetSilenceTimer() {
-    _silenceTimer?.cancel();
-    _silenceTimer = Timer(const Duration(seconds: 3), () {
-      _stopListening();
-    });
-  }
-
-  void _stopListening() {
-    _speech.stop();
-    setState(() => _isListening = false);
-    _silenceTimer?.cancel(); // 타이머 정리
-  }
 
   @override
   void initState() {
     super.initState();
-    _startConversation();
     _speech = stt.SpeechToText();
+    _startConversation();
   }
 
-  /// 1) startConversation 호출
   Future<void> _startConversation() async {
-    final uri = Uri.parse(_startUrl);
     final res = await http.post(
-      uri,
+      Uri.parse(_startUrl),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'userId': _userId, 'scenario': _scenarioId}),
+      body: jsonEncode({
+        'userId': widget.userId,
+        'scenario': widget.scenarioId,
+      }),
     );
     if (res.statusCode != 200) {
-      throw Exception('startConversation failed: status ${res.statusCode}');
+      throw Exception('startConversation failed: ${res.statusCode}');
     }
-
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     setState(() {
       _sessionId = data['sessionId'] as String?;
       _messages.add(
-        ChatMessage(
-          text: data['botInitialMessage'] as String,
-          isMe: false,
-          showStamp: false, // 기본적으로 스탬프는 표시하지 않음
-        ),
+        ChatMessage(text: data['botInitialMessage'] as String, isMe: false),
       );
     });
   }
 
-  /// 2) sendMessage 호출
   Future<void> _sendMessage(String userMessage) async {
     if (_sessionId == null) return;
-
-    final uri = Uri.parse(_sendUrl);
     final res = await http.post(
-      uri,
+      Uri.parse(_sendUrl),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'userId': _userId,
+        'userId': widget.userId,
         'sessionId': _sessionId,
         'message': userMessage,
       }),
     );
     if (res.statusCode != 200) {
-      throw Exception('sendMessage failed: status ${res.statusCode}');
+      throw Exception('sendMessage failed: ${res.statusCode}');
     }
-
     final data = jsonDecode(res.body) as Map<String, dynamic>;
-
-    // 1) completedMissions 파싱
-    final List<String> completedMissions =
+    final completed =
         (data['completedMissions'] as List<dynamic>).cast<String>();
+    final sessionStatus = data['sessionStatus'] as String?;
 
     setState(() {
+      _sessionStatus = sessionStatus;
+      _completedMissions = completed;
       _messages.add(
         ChatMessage(
           text: data['botMessage'] as String,
           isMe: false,
-          completedMissions: completedMissions, // 기본값: 스탬프 표시 안 함
+          completedMissions: completed,
         ),
       );
-      _sessionStatus = data['sessionStatus'] as String?;
-      _completedMissions =
-          (data['completedMissions'] as List<dynamic>).cast<String>();
     });
+
+    // 레슨 완료 시 저장
+    if (sessionStatus == 'ended') {
+      context.read<UserPreferencesViewModel>().onLessonCompleted(
+        context,
+        widget.lessonIndex,
+      );
+    }
   }
 
-  void _handleSend() async {
+  void _handleSend() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-
     setState(() {
-      // 1) 내 메시지 화면에 추가
-      _messages.add(ChatMessage(text: text, isMe: true, showStamp: false));
+      _messages.add(ChatMessage(text: text, isMe: true));
     });
     _controller.clear();
+    _sendMessage(text);
+  }
 
-    // 2) 백엔드로 전송하고 응답 처리
-    await _sendMessage(text);
+  void _startListening() async {
+    final available = await _speech.initialize();
+    if (!available) return;
+    setState(() => _isListening = true);
+    _speech.listen(
+      onResult: (result) {
+        setState(() {
+          _controller.text = result.recognizedWords;
+          _controller.selection = TextSelection.collapsed(
+            offset: _controller.text.length,
+          );
+        });
+        _resetSilenceTimer();
+      },
+      localeId: 'ko_KR',
+    );
+    _resetSilenceTimer();
+  }
+
+  void _resetSilenceTimer() {
+    _silenceTimer?.cancel();
+    _silenceTimer = Timer(const Duration(seconds: 3), _stopListening);
+  }
+
+  void _stopListening() {
+    _speech.stop();
+    setState(() => _isListening = false);
+    _silenceTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     return CommonScaffold(
-      title: 'Lesson1',
+      title: 'Lesson ${widget.lessonIndex + 1}',
       selectedNavIndex: 1,
-      onNavTap: (idx) {
-        /* 탭 이동 */
-      },
+      onNavTap: (_) {},
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          //  채팅 메시지 리스트
+          // 채팅 리스트
           Expanded(
-            child: Container(
-              color: AppColors.background,
-              child: ListView.builder(
-                reverse: true,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 24,
-                ),
-                itemCount: _messages.length,
-                itemBuilder: (_, i) {
-                  final msg = _messages[_messages.length - 1 - i];
-                  return _MessageWithStamp(msg: msg);
-                },
-              ),
+            child: ListView.builder(
+              reverse: true,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              itemCount: _messages.length,
+              itemBuilder: (_, i) {
+                final msg = _messages[_messages.length - 1 - i];
+                return _MessageWithStamp(msg: msg);
+              },
             ),
           ),
 
-          // ─── 입력 영역 ──────────────────────────
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      _isListening ? Icons.mic_off : Icons.mic,
-                      size: 28,
-                    ),
-                    color: AppColors.gray,
-                    onPressed: _isListening ? _stopListening : _startListening,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.chatBackground,
-                        borderRadius: BorderRadius.circular(24),
+          // 세션 종료 시 “다음 레슨 진행하기” 버튼, 아니면 입력창
+          if (_sessionStatus == 'ended')
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: PrimaryActionButton(
+                text: '다음 레슨 진행하기',
+                icon: Image.asset(
+                  'assets/images/leftArrowCircle.png',
+                  width: 24,
+                  height: 24,
+                ),
+                alignment: MainAxisAlignment.center,
+                width: double.infinity,
+                onPressed: () {
+                  final nextIndex = widget.lessonIndex + 1;
+                  const scenarios = [
+                    'emotion_conversation_scenario',
+                    'make_decision_scenario',
+                    'ask_for_help_scenario',
+                  ];
+                  final nextScenario =
+                      scenarios[(nextIndex - 1).clamp(0, scenarios.length - 1)];
+                  context.go(
+                    '${RouteNames.chat}?index=$nextIndex&scenarioId=$nextScenario',
+                  );
+                },
+              ),
+            )
+          else
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        _isListening ? Icons.mic_off : Icons.mic,
+                        size: 28,
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.text,
+                      color: AppColors.gray,
+                      onPressed:
+                          _isListening ? _stopListening : _startListening,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.chatBackground,
+                          borderRadius: BorderRadius.circular(24),
                         ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: '메시지를 입력하세요',
-                          hintStyle: AppTextStyles.body.copyWith(
-                            color: AppColors.gray,
+                        child: TextField(
+                          controller: _controller,
+                          style: AppTextStyles.body.copyWith(
+                            color: AppColors.text,
                           ),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '메시지를 입력하세요',
+                            hintStyle: AppTextStyles.body.copyWith(
+                              color: AppColors.gray,
+                            ),
+                          ),
+                          onSubmitted: (_) => _handleSend(),
                         ),
-                        onSubmitted: (_) => _handleSend(),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.send, size: 28),
-                    color: AppColors.primary,
-                    onPressed: _handleSend,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.send, size: 28),
+                      color: AppColors.primary,
+                      onPressed: _handleSend,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
-/// 메시지와, 상대방 메시지 뒤에만 스탬프를 붙여주는 위젯
 class _MessageWithStamp extends StatelessWidget {
   final ChatMessage msg;
   const _MessageWithStamp({required this.msg, Key? key}) : super(key: key);
@@ -260,8 +271,6 @@ class _MessageWithStamp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bubble = ChatBubble(msg: msg);
-
-    // 상대방 메시지이면서, showStamp가 true일 때만 도장 표시
     if (!msg.isMe && msg.completedMissions.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,14 +285,13 @@ class _MessageWithStamp extends StatelessWidget {
                     'assets/images/missionComplete.png',
                     width: 100,
                     height: 100,
+                    fit: BoxFit.contain,
                   );
                 }).toList(),
           ),
         ],
       );
     }
-
-    // 그 외에는 말풍선만
     return bubble;
   }
 }
@@ -291,13 +299,11 @@ class _MessageWithStamp extends StatelessWidget {
 class ChatMessage {
   final String text;
   final bool isMe;
-  final bool showStamp; // ◀ 추가: 스탬프 표시 여부
   final List<String> completedMissions;
 
   ChatMessage({
     required this.text,
     this.isMe = false,
-    this.showStamp = false, // 기본값 false
     this.completedMissions = const [],
   });
 }
