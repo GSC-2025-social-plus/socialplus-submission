@@ -67,7 +67,7 @@ class LessonCard extends StatelessWidget {
                     onPressed: onPressed,
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40),
                       ),

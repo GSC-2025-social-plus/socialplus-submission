@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:social_plus_fe/domain/models/lesson.dart';
-import 'package:social_plus_fe/domain/popular_lesson_repository.dart';
+import 'package:social_plus_fe/domain/repository/popular_lesson_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final LessonRepository _repository;

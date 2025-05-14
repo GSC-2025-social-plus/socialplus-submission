@@ -3,10 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
+import 'package:social_plus_fe/presentation/routes/route_names.dart';
 import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
-import 'package:social_plus_fe/presentation/widgets/custom_bottom_nav_bar.dart';
 import '../viewmodels/user_preferences_viewmodel.dart';
-import '../widgets/common_app_bar.dart';
 import '../widgets/job_type_button.dart';
 
 class JobTypeScreen extends StatelessWidget {
@@ -34,7 +33,7 @@ class JobTypeScreen extends StatelessWidget {
                 final prefs = context.read<UserPreferencesViewModel>();
                 await prefs.saveConversationType('job-cafe');
                 Future.microtask(() {
-                  context.push('/lesson-selection');
+                  context.go(RouteNames.lessonSelection);
                 });
               },
             ),
@@ -46,7 +45,7 @@ class JobTypeScreen extends StatelessWidget {
                 final prefs = context.read<UserPreferencesViewModel>();
                 await prefs.saveConversationType('job-manufacture');
                 Future.microtask(() {
-                  context.push('/lesson-selection');
+                  context.go(RouteNames.lessonSelection);
                 });
               },
             ),
@@ -58,7 +57,7 @@ class JobTypeScreen extends StatelessWidget {
                 final prefs = context.read<UserPreferencesViewModel>();
                 await prefs.saveConversationType('job-it');
                 Future.microtask(() {
-                  context.push('/lesson-selection');
+                  context.go(RouteNames.lessonSelection);
                 });
               },
             ),

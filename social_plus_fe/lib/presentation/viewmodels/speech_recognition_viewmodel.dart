@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../domain/speech_recognition_repository.dart';
+import '../../domain/repository/speech_recognition_repository.dart';
 
 class SpeechRecognitionViewModel extends ChangeNotifier {
   final SpeechRecognitionRepository repo;

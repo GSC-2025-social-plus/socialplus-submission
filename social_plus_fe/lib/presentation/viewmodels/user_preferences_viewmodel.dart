@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-import '../../domain/user_preferences_repository.dart';
+import '../../domain/repository/user_preferences_repository.dart';
 
 class UserPreferencesViewModel extends ChangeNotifier {
   final UserPreferencesRepository repo;

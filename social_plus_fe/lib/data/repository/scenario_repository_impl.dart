@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../domain/models/scenario.dart';
-import '../../domain/scenario_repository.dart';
+import '../../domain/repository/scenario_repository.dart';
 
 class ScenarioRepositoryImpl implements ScenarioRepository {
   final String baseUrl = 'https://startconversation-imrcv7okwa-uc.a.run.app';
@@ -25,10 +25,7 @@ class ScenarioRepositoryImpl implements ScenarioRepository {
     final missions = missionsMap.entries.map((e) {
       final m = e.value;
       return Mission(
-        id: e.key,
         description: m['description'] ?? '',
-        completed: m['completed'] ?? false,
-        stampImageId: m['stampImageId'] ?? 'stamp_initial',
       );
     }).toList();
 
@@ -36,7 +33,6 @@ class ScenarioRepositoryImpl implements ScenarioRepository {
       scenarioId: data['scenarioId'],
       scenarioName: data['scenarioName'],
       scenarioDescription: data['scenarioDescription'],
-      botInitialMessage: data['botInitialMessage'],
       missions: _parseMissions(data['missions']),
     );
   }
@@ -53,10 +49,7 @@ class ScenarioRepositoryImpl implements ScenarioRepository {
     return missionData.entries.map((e) {
       final m = e.value as Map<String, dynamic>;
       return Mission(
-        id: e.key,
         description: m['description'] ?? '',
-        completed: m['completed'] ?? false,
-        stampImageId: m['stampImageId'] ?? 'stamp_initial',
       );
     }).toList();
   }

@@ -1,5 +1,5 @@
 
-import '../../domain/user_preferences_repository.dart';
+import '../../domain/repository/user_preferences_repository.dart';
 import '../user_preferences_data_source.dart';
 
 class UserPreferencesRepositoryImpl implements UserPreferencesRepository {

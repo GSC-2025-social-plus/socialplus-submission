@@ -13,7 +13,7 @@ class LessonRepository {
       ),
       Lesson(
         title: '상대방을 배려하는 대화',
-        description: '친구, 가족과 갈등 없이 소통하는 법!',
+        description: '친구, 가족과\n갈등 없이 소통하는 법!',
         imagePath: 'assets/images/converstation.png',
         isAvailable: false,
       ),

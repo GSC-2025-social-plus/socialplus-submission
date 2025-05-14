@@ -1,4 +1,4 @@
-import '../../domain/speech_recognition_repository.dart';
+import '../../domain/repository/speech_recognition_repository.dart';
 import '../speech_to_text_data_source.dart';
 
 class SpeechRecognitionRepositoryImpl implements SpeechRecognitionRepository {

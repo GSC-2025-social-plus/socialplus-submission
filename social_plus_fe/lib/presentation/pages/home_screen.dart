@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
 import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
+import '../routes/route_names.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../viewmodels/user_preferences_viewmodel.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
@@ -62,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     imagePath: lesson.imagePath,
                     title: lesson.title,
                     description: lesson.description,
-                    buttonText: lesson.isAvailable ? '시작하기' : '레슨 완료 후 이용하세요',
+                    buttonText: '레슨 완료 후 이용하세요',
                     onPressed: lesson.isAvailable
                         ? () {}
                         : null,
@@ -85,9 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 final selectedType = prefs.conversationType;
 
                 if (selectedType != null && selectedType.isNotEmpty) {
-                  context.push('/lesson-selection');
+                  context.go(RouteNames.lessonSelection);
                 } else {
-                  context.push('/type-choose');
+                  context.go(RouteNames.typeChoose);
                 }
               },
               icon: Image.asset(

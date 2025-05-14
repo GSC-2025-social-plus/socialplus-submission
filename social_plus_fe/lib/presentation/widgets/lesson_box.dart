@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
+import 'package:social_plus_fe/presentation/routes/route_names.dart';
 
 class LessonBox extends StatelessWidget {
   final int index;
@@ -26,7 +27,7 @@ class LessonBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         onTap: isActive
             ? () {
-          context.push('/lesson?index=$index');
+          context.push('${RouteNames.lesson}?index=$index');
         }
             : null,
         child: Stack(

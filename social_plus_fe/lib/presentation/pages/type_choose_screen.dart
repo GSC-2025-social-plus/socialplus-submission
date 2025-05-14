@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:social_plus_fe/presentation/constants/colors.dart';
 import 'package:social_plus_fe/presentation/constants/text_styles.dart';
 import 'package:social_plus_fe/presentation/widgets/app_scaffold.dart';
+import '../routes/route_names.dart';
 import '../viewmodels/user_preferences_viewmodel.dart';
 import '../widgets/type_option_card.dart';
 
@@ -36,7 +37,7 @@ class TypeChooseScreen extends StatelessWidget {
                 final prefs = context.read<UserPreferencesViewModel>();
                 await prefs.saveConversationType('daily');
                 Future.microtask(() {
-                  context.go('/lesson-selection');
+                  context.go(RouteNames.lessonSelection);
                 });
               },
             ),
@@ -45,7 +46,7 @@ class TypeChooseScreen extends StatelessWidget {
               iconPath: 'assets/images/business.png',
               text: '상사나 동료와의 대화가 어렵다면\n여기를 눌러보세요!',
               onTap: () {
-                context.push('/job-type');
+                context.push(RouteNames.jobType);
               },
             ),
           ],
