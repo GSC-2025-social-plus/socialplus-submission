@@ -139,14 +139,13 @@ class _ChatPageState extends State<ChatPage> {
     // 1) completedMissions 파싱
     final List<String> completedMissions =
         (data['completedMissions'] as List<dynamic>).cast<String>();
-    final bool missionCompleted = completedMissions.isNotEmpty;
 
     setState(() {
       _messages.add(
         ChatMessage(
           text: data['botMessage'] as String,
           isMe: false,
-          showStamp: missionCompleted, // 기본값: 스탬프 표시 안 함
+          completedMissions: completedMissions, // 기본값: 스탬프 표시 안 함
         ),
       );
       _sessionStatus = data['sessionStatus'] as String?;
@@ -180,7 +179,7 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // ─── 채팅 메시지 리스트 ──────────────────
+          //  채팅 메시지 리스트
           Expanded(
             child: Container(
               color: AppColors.background,
@@ -263,17 +262,22 @@ class _MessageWithStamp extends StatelessWidget {
     final bubble = ChatBubble(msg: msg);
 
     // 상대방 메시지이면서, showStamp가 true일 때만 도장 표시
-    if (!msg.isMe && msg.showStamp) {
+    if (!msg.isMe && msg.completedMissions.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           bubble,
           const SizedBox(height: 6),
-          Image.asset(
-            'assets/images/missionComplete.png',
-            width: 100,
-            height: 100,
-            fit: BoxFit.contain,
+          Wrap(
+            spacing: 8,
+            children:
+                msg.completedMissions.map((_) {
+                  return Image.asset(
+                    'assets/images/missionComplete.png',
+                    width: 100,
+                    height: 100,
+                  );
+                }).toList(),
           ),
         ],
       );
@@ -288,11 +292,13 @@ class ChatMessage {
   final String text;
   final bool isMe;
   final bool showStamp; // ◀ 추가: 스탬프 표시 여부
+  final List<String> completedMissions;
 
   ChatMessage({
     required this.text,
     this.isMe = false,
     this.showStamp = false, // 기본값 false
+    this.completedMissions = const [],
   });
 }
 

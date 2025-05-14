@@ -14,22 +14,23 @@ import 'package:provider/provider.dart';
 void main() {
   runApp(
     ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 769,
-        minHeight: 600,
-      ),
+      constraints: const BoxConstraints(minWidth: 769, minHeight: 600),
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => LessonScenarioViewModel(ScenarioRepositoryImpl())),
+          ChangeNotifierProvider(
+            create: (_) => LessonScenarioViewModel(ScenarioRepositoryImpl()),
+          ),
           Provider<LessonRepository>(create: (_) => LessonRepository()),
           ChangeNotifierProvider(
-            create: (context) => HomeViewModel(context.read<LessonRepository>()),
+            create:
+                (context) => HomeViewModel(context.read<LessonRepository>()),
           ),
           ChangeNotifierProvider(create: (_) => LessonSelectViewModel()),
           ChangeNotifierProvider(
-            create: (_) => UserPreferencesViewModel(
-              UserPreferencesRepositoryImpl(UserPreferencesDataSource()),
-            ),
+            create:
+                (_) => UserPreferencesViewModel(
+                  UserPreferencesRepositoryImpl(UserPreferencesDataSource()),
+                ),
           ),
         ],
         child: const MyApp(),
@@ -37,8 +38,6 @@ void main() {
     ),
   );
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
