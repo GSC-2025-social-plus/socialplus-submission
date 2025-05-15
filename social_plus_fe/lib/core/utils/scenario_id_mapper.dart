@@ -6,7 +6,24 @@ class ScenarioIdMapper {
       3: 'make_decision_scenario',
       4: 'request_for_help_scenario',
     },
-    // job 도 나중에 추가 가능
+    'job-cafe': {
+      1: 'park_friend_scenario',
+      2: 'emotion_conversation_scenario',
+      3: 'make_decision_scenario',
+      4: 'request_for_help_scenario',
+    },
+    'job-it': {
+      1: 'park_friend_scenario',
+      2: 'emotion_conversation_scenario',
+      3: 'make_decision_scenario',
+      4: 'request_for_help_scenario',
+    },
+    'job-manufacture': {
+      1: 'park_friend_scenario',
+      2: 'emotion_conversation_scenario',
+      3: 'make_decision_scenario',
+      4: 'request_for_help_scenario',
+    },
   };
 
   static String getScenarioId(String type, int lessonNumber) {

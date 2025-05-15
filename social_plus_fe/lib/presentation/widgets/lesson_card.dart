@@ -8,6 +8,7 @@ class LessonCard extends StatelessWidget {
   final String description;
   final String buttonText;
   final VoidCallback? onPressed;
+  final bool enabled;
 
   const LessonCard({
     super.key,
@@ -15,6 +16,7 @@ class LessonCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.buttonText,
+    required this.enabled,
     this.onPressed,
   });
 
@@ -67,7 +69,7 @@ class LessonCard extends StatelessWidget {
                     onPressed: onPressed,
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Colors.grey,
+                      backgroundColor: enabled? AppColors.primary : Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40),
                       ),

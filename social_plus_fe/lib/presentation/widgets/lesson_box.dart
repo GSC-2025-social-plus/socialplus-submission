@@ -25,7 +25,7 @@ class LessonBox extends StatelessWidget {
       clipBehavior: Clip.none,
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        onTap: isActive
+        onTap: isActive&&!isCompleted
             ? () {
           context.push('${RouteNames.lesson}?index=$index');
         }

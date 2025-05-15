@@ -33,6 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
 
+    final prefsViewModel = context.watch<UserPreferencesViewModel>();
+    final lessonCompletion = prefsViewModel.lessonCompletion;
+    final nextIndex = lessonCompletion.indexOf(false);
+    final nextLesson = nextIndex == -1 ? null : nextIndex + 1;
+
+    bool _isAllCompleted = false;
+    if (nextLesson == null) {
+      _isAllCompleted = true;
+    }
+
     return CommonScaffold(
       title: "Home",
       selectedNavIndex: 0,
@@ -61,9 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   final lesson = viewModel.lessons[index];
                   return LessonCard(
                     imagePath: lesson.imagePath,
+                    enabled: _isAllCompleted,
                     title: lesson.title,
                     description: lesson.description,
-                    buttonText: '레슨 완료 후 이용하세요',
+                    buttonText: _isAllCompleted? '시작하기' : '레슨 완료 후 이용하세요.',
                     onPressed: lesson.isAvailable
                         ? () {}
                         : null,
