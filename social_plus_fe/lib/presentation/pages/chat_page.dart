@@ -208,7 +208,7 @@ class _ChatPageState extends State<ChatPage> {
               child: PrimaryActionButton(
                 text: '다음 레슨 진행하기',
                 icon: Image.asset(
-                  'assets/images/leftArrowCircle.png',
+                  'assets/images/RightArrowCircle.png',
                   width: 24,
                   height: 24,
                 ),
