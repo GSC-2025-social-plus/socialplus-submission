@@ -214,18 +214,17 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 alignment: MainAxisAlignment.center,
                 width: double.infinity,
-                onPressed: () {
-                  final nextIndex = widget.lessonIndex + 1;
-                  const scenarios = [
-                    'emotion_conversation_scenario',
-                    'make_decision_scenario',
-                    'ask_for_help_scenario',
-                  ];
-                  final nextScenario =
-                      scenarios[(nextIndex - 1).clamp(0, scenarios.length - 1)];
-                  context.go(
-                    '${RouteNames.chat}?index=$nextIndex&scenarioId=$nextScenario',
-                  );
+                onPressed: () async {
+                  final prefs = context.read<UserPreferencesViewModel>();
+                  await prefs.loadPreferences();
+
+                  final selectedType = prefs.conversationType;
+
+                  if (selectedType != null && selectedType.isNotEmpty) {
+                    context.push(RouteNames.lessonSelection);
+                  } else {
+                    context.push(RouteNames.typeChoose);
+                  }
                 },
               ),
             )
@@ -246,12 +245,18 @@ class _ChatPageState extends State<ChatPage> {
                           _micPermissionGranted ? Icons.mic : Icons.mic_off,
                           size: _isListening ? 32 : 28,
                         ),
-                        color: _isListening
-                            ? AppColors.primary
-                            : AppColors.gray.withOpacity(_micPermissionGranted ? 1.0 : 0.4),
-                        onPressed: _micPermissionGranted
-                            ? (_isListening ? _stopListening : _startListening)
-                            : null,
+                        color:
+                            _isListening
+                                ? AppColors.primary
+                                : AppColors.gray.withOpacity(
+                                  _micPermissionGranted ? 1.0 : 0.4,
+                                ),
+                        onPressed:
+                            _micPermissionGranted
+                                ? (_isListening
+                                    ? _stopListening
+                                    : _startListening)
+                                : null,
                       ),
                     ),
                     const SizedBox(width: 8),

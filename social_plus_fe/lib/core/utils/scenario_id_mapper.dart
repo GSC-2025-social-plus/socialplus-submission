@@ -4,12 +4,13 @@ class ScenarioIdMapper {
       1: 'park_friend_scenario',
       2: 'emotion_conversation_scenario',
       3: 'make_decision_scenario',
-      4: 'ask_for_help_scenario',
+      4: 'request_for_help_scenario',
     },
     // job 도 나중에 추가 가능
   };
 
   static String getScenarioId(String type, int lessonNumber) {
-    return _scenarioMap[type]?[lessonNumber] ?? 'park_friend_scenario'; // 기본 fallback
+    return _scenarioMap[type]?[lessonNumber] ??
+        'park_friend_scenario'; // 기본 fallback
   }
 }

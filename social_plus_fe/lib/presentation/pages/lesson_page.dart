@@ -15,10 +15,7 @@ import '../widgets/primary_action_button.dart';
 class LessonMissionsScreen extends StatefulWidget {
   final int lessonIndex;
 
-  const LessonMissionsScreen({
-    super.key,
-    required this.lessonIndex,
-  });
+  const LessonMissionsScreen({super.key, required this.lessonIndex});
 
   @override
   State<LessonMissionsScreen> createState() => _LessonMissionsScreenState();
@@ -31,8 +28,12 @@ class _LessonMissionsScreenState extends State<LessonMissionsScreen> {
 
     // ViewModel에서 type 가져와서 시나리오 로드
     Future.microtask(() {
-      final type = context.read<UserPreferencesViewModel>().conversationType ?? 'daily';
-      context.read<LessonScenarioViewModel>().loadScenario(index: widget.lessonIndex, type: type);
+      final type =
+          context.read<UserPreferencesViewModel>().conversationType ?? 'daily';
+      context.read<LessonScenarioViewModel>().loadScenario(
+        index: widget.lessonIndex,
+        type: type,
+      );
     });
   }
 
@@ -42,9 +43,7 @@ class _LessonMissionsScreenState extends State<LessonMissionsScreen> {
     final scenario = viewModel.scenario;
 
     if (viewModel.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final missions = scenario?.missions ?? [];
@@ -62,7 +61,6 @@ class _LessonMissionsScreenState extends State<LessonMissionsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ✅ 여기를 수정!
                   SizedBox(
                     height: 120,
                     child: SingleChildScrollView(
@@ -95,7 +93,8 @@ class _LessonMissionsScreenState extends State<LessonMissionsScreen> {
                       text: '시작하기',
                       onPressed: () {
                         final lessonIndex = widget.lessonIndex;
-                        final scenarioId = scenario?.scenarioId ?? 'daily_lesson_1';
+                        final scenarioId =
+                            scenario?.scenarioId ?? 'daily_lesson_1';
                         context.push(
                           '${RouteNames.chat}?index=$lessonIndex&scenarioId=$scenarioId',
                         );
