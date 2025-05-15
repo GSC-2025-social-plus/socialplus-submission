@@ -132,7 +132,7 @@ The backend integrates Firebase Cloud Functions with Python business logic and G
 
 ## Team
 
-| Wooin Kim | Sumin Jang | TAESEONG JEONG | YEONGCHAN JO |
+| WOOIN KIM | SUMIN JANG | TAESEONG JEONG | YEONGCHAN JO |
 | ---- | --- | --- | -------- |
 | UI/UX Designer | Frontend | Frontend | Backend&AI |
 
