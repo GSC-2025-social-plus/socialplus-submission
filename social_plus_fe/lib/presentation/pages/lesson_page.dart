@@ -100,7 +100,7 @@ class _LessonMissionsScreenState extends State<LessonMissionsScreen> {
                         );
                       },
                       icon: Image.asset(
-                        'assets/images/rightArrowCircle.png',
+                        'assets/images/leftArrowCircle.png',
                         width: 24,
                         height: 24,
                         color: Colors.white,
