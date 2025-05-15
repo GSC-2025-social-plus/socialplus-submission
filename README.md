@@ -7,6 +7,8 @@
 ---
 
 ## Introduction
+![2](https://github.com/user-attachments/assets/fe76b951-bf8b-4917-9618-73a262a40daf)
+
 
 **Social Plus** is a generative AI-based application designed to improve social skills among young adults with borderline intellectual functioning (BIF).
 
